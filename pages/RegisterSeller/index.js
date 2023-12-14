@@ -1,25 +1,17 @@
-import { useState, useRef, useEffect } from "react";
+import { useState,  useEffect } from "react";
 import { useRouter } from "next/router";
-import  { abi } from '../constants/ABIcontract'
-// import {abi } from '../constants/wagmiABIContract'
-import {ContractAddress}  from '../constants/ContractAddress'
-import {  useContractRead, usePrepareContractWrite, usePublicClient, useWalletClient } from "wagmi";
+import  { abi } from '../../constants/ABIcontract'
+import {ContractAddress}  from '../../constants/ContractAddress'
+import {  useContractRead } from "wagmi";
 import { useContractWrite , useAccount} from 'wagmi'
-import RegisterToBlockchain from "../components/SellerRegisterBlockchain";
-// import { useSignMessage } from "wagmi";
-import { readContract } from '@wagmi/core'
-import { Contract } from "ethers";
-import Layout from "../components/layout";
-import Header from "../components/Header";
-const Page = () => {
+import RegisterToBlockchain from "../../components/SellerRegisterBlockchain";
+import Header from "../../components/Header";
+const RegisterSeller = () => {
   const [file, setFile] = useState("");
   const [cid, setCid] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const router = useRouter();
-
-
-  // const {account}  = useAccount();
 
   const [mounted, setMounted] = useState(false);
 
@@ -206,4 +198,4 @@ const Page = () => {
 };
 
 
-export default Page;
+export default RegisterSeller;

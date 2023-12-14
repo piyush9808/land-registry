@@ -1,5 +1,5 @@
 import React from 'react'
-import Layout from '../../components/layout'
+import Layout from '../../components/LayoutLandInspector'
 import { useContractRead } from 'wagmi'
 import { ContractAddress } from '../../constants/ContractAddress'
 import { abi } from '../../constants/ABIcontract'
@@ -61,6 +61,20 @@ const TransactionInfo = () => {
         functionName: "getBuyer",
     })
 
+    const data = useContractRead({
+        address: ContractAddress,
+        abi: abi,
+        functionName: "getRequestDetails",
+        args: [1],
+    })
+
+    const Ispaid = useContractRead({
+        address: ContractAddress,
+        abi: abi,
+        functionName: "isPaid",
+        args: [1],
+    })
+
     const verify = async () => {
         const {request} = await prepareWriteContract({
             address: ContractAddress,
@@ -101,6 +115,13 @@ const TransactionInfo = () => {
                     <td><button onClick={() => verify()} className='bg-blue-600 text-white p-4 rounded-lg'>Verify Transaction</button></td>
                 </tbody>
             </table>
+
+            <div>
+                <h1>Buyer : {data?.data?.[1]}</h1>
+                <h1>Seller : {data?.data?.[0]}</h1>
+                <h1>Land Id : {(data?.data?.[2])?.toString()}</h1>
+                <h1>Paid : {(Ispaid?.data)?.toString()}</h1>
+            </div>
 
         </div>
     </Layout>

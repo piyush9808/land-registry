@@ -2,14 +2,11 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 
 import React from 'react'
-
-export const page = () => {
+ const Page = () => {
   return (
     <ConnectButton/>
   )
 }
 
+export default Page;
 
-// export const YourApp = () => {
-//   return <ConnectButton />;
-// };

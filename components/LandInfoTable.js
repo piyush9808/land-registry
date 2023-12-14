@@ -9,7 +9,10 @@ import { prepareWriteContract, writeContract } from "@wagmi/core";
 
 const LandInfoTable = () => {
 
-    const {role } = useContext(RoleContext)
+    const {role } = useContext(RoleContext);
+
+
+    
 
     const router = useRouter();
   const { address } = useAccount();

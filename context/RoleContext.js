@@ -1,4 +1,7 @@
 import React, { createContext, useState, useEffect} from "react";
+import { useAccount, useContractRead } from "wagmi";
+import { ContractAddress } from "../constants/ContractAddress";
+import { abi } from "../constants/ABIcontract";
 
 const RoleContext = createContext();
 
@@ -7,17 +10,31 @@ const RoleProvider = ({ children }) => {
 
   // let localValue;
   const [role, setRole] = useState(null);
+  const {address} = useAccount();
 
-
+  const isSeller = useContractRead({
+    address: ContractAddress,
+    abi:abi,
+    functionName:'isSeller',
+    args: [address]
+  })
+  
+  const isBuyer = useContractRead({
+    address:ContractAddress,
+    abi:abi,
+    functionName:'isBuyer',
+    args:[address]
+  })
   useEffect(() => {
-    // Get the stored value from localStorage
-    const stored = localStorage.getItem('role');
-
-    // If there's a stored value, set it in the component state
-    if (stored) {
-      setRole(stored);
+    if(isSeller.data){
+      setRole('Seller');
     }
-  }, []);
+
+    if(isBuyer.data){
+      setRole('Buyer')
+    }
+
+  }, [isBuyer.data, isSeller.data]);
 
   return (
     <RoleContext.Provider value={{ role, setRole }}>

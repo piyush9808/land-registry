@@ -147,9 +147,10 @@ const AddLand = () => {
 
         <div>
           <label htmlFor="insert Land image">insert Land image</label>
-          <input type="file" 
+          <input 
+          type="file" 
           name='landImage'
-          accept='application/png'
+          // accept='application/png'
           // value={landData.landImage}
           onChange={handleChangeFile}
           required

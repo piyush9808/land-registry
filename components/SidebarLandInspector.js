@@ -14,7 +14,7 @@ const SidebarLandInspector = () => {
          <div className="border w-full p-4 mr-3 rounded-lg ">
       <div className="flex flex-col gap-4">
       <button
-       onClick={() => router.push("/Dashboard")}
+       onClick={() => router.push("/LandInspectorDashboard")}
        className="flex  items-center  gap-3">
         <RxDashboard />
         Dashboard
@@ -42,6 +42,12 @@ const SidebarLandInspector = () => {
       className="flex items-center gap-3">
         <AiOutlineReconciliation />
         Transaction Info
+      </button>
+      <button 
+      onClick={() => router.push("/verifyLand")}
+      className='flex items-center gap-3'>
+        <FaImages />
+        Verify Land
       </button>
       </div>
     </div>

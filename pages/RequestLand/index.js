@@ -41,7 +41,7 @@ const RequestLand = () => {
     args: [1],
   })
 
-  console.log('requestStatus', requestStatus.data);
+  console.log('requestStatus', requestStatus?.data);
 
   // console.log('buyerId', buyerId);
 
@@ -57,9 +57,9 @@ const RequestLand = () => {
         </thead>
         <tbody>
           <td>1</td>
-          <td>{buyerId.data}</td>
+          <td>{buyerId?.data}</td>
           <td>1</td>
-          <td>{(requestStatus.data).toString()}</td>
+          <td>{(requestStatus?.data)?.toString()}</td>
           <td>
             <button className='border bg-blue-600 text-white p-3 rounded-lg' onClick={() => approve()}>Approve 
             Request</button>

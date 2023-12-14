@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Layout from '../../components/LayoutLandInspector'
 import Link from 'next/link'
 import { useContractRead } from 'wagmi'
@@ -8,7 +8,7 @@ import {prepareWriteContract, writeContract} from '@wagmi/core'
 
 const SellerProfile = () => {
 
-
+  const [mounted, setMounted] = useState(false);
 
     
     const data = useContractRead({
@@ -57,7 +57,12 @@ const SellerProfile = () => {
     }
 
 
-    if(data.data == ''){
+
+    useEffect(() =>  {
+      setMounted(true)
+    },[])
+
+    if(data?.data == ''){
         return <Layout>No Seller</Layout>
     }
 
@@ -81,7 +86,8 @@ const SellerProfile = () => {
         </thead>
         <tbody>
           <tr>
-            <td>{data.data?.[0]}</td>
+           {
+            mounted &&  (<> <td>{data.data?.[0]}</td>
             <td>{data1?.[0]}</td>
             <td>{Number(data1?.[5])}</td>
             <td>{data1?.[4]}</td>
@@ -89,7 +95,8 @@ const SellerProfile = () => {
             <td>{data1?.[2]}</td>
             <td>{data1?.[6]}</td>
             <td><Link href={data1?.[3] === undefined ? "" : data1?.[3]} target="_black" className="text-sky-600">Click Here</Link></td>
-            <td>{(verifyBuyer?.data)?.toString()}</td>
+            <td>{(verifyBuyer?.data)?.toString()}</td></>)
+           }
             <td><button onClick={() => verify()} className="bg-blue-600 text-white px-5 py-2 rounded-lg">verify</button></td>
             <td><button onClick={() => reject()} className="bg-red-500 text-white px-5 py-2 rounded-lg">Reject</button></td>
           </tr>

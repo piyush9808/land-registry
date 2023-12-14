@@ -2,54 +2,60 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { useAccount, useContractRead } from "wagmi";
 import { RoleContext } from "../context/RoleContext";
-// import { ConnectButton } from "@rainbow-me/rainbowkit";
 import dynamic from "next/dynamic";
 import { ContractAddress } from "../constants/ContractAddress";
 import { abi } from "../constants/ABIcontract";
 
-const ConnectButton = dynamic(() => import("./page"), {
+const ConnectButton = dynamic(() => import("./ConnectButton"), {
   ssr: false,
 });
 
-// import { YourApp } from "./page";
 export default function Home() {
-  const { address ,isConnected} = useAccount();
-  // const [role, setRole] = useState(null);
-  const {role ,setRole} = useContext(RoleContext);
+  const { address, isConnected } = useAccount();
+  const { role, setRole } = useContext(RoleContext);
 
   const router = useRouter();
 
-
-  const data = useContractRead({
+  const isLandInspector = useContractRead({
     abi: abi,
     address: ContractAddress,
     functionName: "isLandInspector",
     args: [address],
-  
-  })
+  });
 
+  
+  // const isLandInspector = useContractRead({
+  //   address: ContractAddress,
+  //   abi:abi,
+  //   functionName: 'isLandInspector',
+
+  // })
 
   useEffect(() => {
-    if(window !== undefined){
-      if (!isConnected) {
-        return (
-          <div className="flex min-h-screen flex-col items-center justify-between p-24">
-              <ConnectButton />
-          </div>
-        );
-      }
-
-      if (data.data) {
-        router.push("/LandInspectorDashboard");
-      }
+    if(isLandInspector.data){
+      router.push('/LandInspectorDashboard');
     }
+  },[address, isLandInspector, router])
 
 
-    
-  })
 
 
-  
+  // useEffect(() => {
+  //   if (window !== undefined) {
+  //     if (!isConnected ) {
+  //       return (
+  //         <div className="flex min-h-screen flex-col items-center justify-between p-24">
+  //           <ConnectButton />
+  //         </div>
+  //       );
+  //     }
+
+  //     if (data.data) {
+  //       router.push("/LandInspectorDashboard");
+  //     }
+  //   }
+  // },[]);
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="border rounded-lg p-3 w-96 bg-neutral-100">
@@ -63,7 +69,10 @@ export default function Home() {
           name="roleSelect"
           id=""
           className="block w-full my-4 p-3 border"
-          onChange={(e) => {setRole(e.target.value); localStorage.setItem("role", e.target.value)}}
+          onChange={(e) => {
+            setRole(e.target.value);
+            localStorage.setItem("role", e.target.value);
+          }}
         >
           <option value="">Select Role</option>
           <option value="Seller">Seller</option>

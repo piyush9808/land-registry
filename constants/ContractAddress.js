@@ -1,1 +1,1 @@
-export const ContractAddress = "0x94a757453a0398cB340eeBE2ae8dE3056E820D63" //contract address goerli testnet
+export const ContractAddress = "0x97A95B39B397329D25b4566619D9BD97f4DE1970" //contract address goerli testnet

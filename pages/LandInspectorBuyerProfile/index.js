@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../../components/LayoutLandInspector";
 import { useContractRead } from "wagmi";
 import { abi } from "../../constants/ABIcontract";
@@ -9,19 +9,22 @@ import { prepareWriteContract, writeContract } from "@wagmi/core";
 const BuyerProfile = () => {
 
 
+
+  const [mounted, setMounted] = useState(false);
+
     const data = useContractRead({
         address:ContractAddress,
         abi: abi,
         functionName: "getBuyer",
     })
 
-    console.log('data',data.data[0]);
+    // console.log('data',data.data[0]);
 
     const {data: data1} = useContractRead({
         address:ContractAddress,
         abi: abi,
         functionName: "getBuyerDetails",
-        args: [data.data[0]],
+        args: [data?.data?.[0]],
         
     })
     
@@ -29,7 +32,7 @@ const BuyerProfile = () => {
         address:ContractAddress,
         abi: abi,
         functionName: "isVerified",
-        args: [data.data[0]],
+        args: [data?.data?.[0]],
     })
 
 
@@ -38,7 +41,7 @@ const BuyerProfile = () => {
             address: ContractAddress,
             abi: abi,
             functionName: "verifyBuyer",
-            args: [data.data[0]],
+            args: [data?.data?.[0]],
         })
 
         const {hash} = await writeContract(request);
@@ -49,13 +52,17 @@ const BuyerProfile = () => {
             address: ContractAddress,
             abi:abi,
             functionName: "rejectBuyer",
-            args: [data.data[0]],
+            args: [data?.data?.[0]],
         })
 
         const {hash} = await writeContract(request);
     }
 
 
+
+    useEffect(() => {
+      setMounted(true);
+    },[])
 
   return (
     <Layout>
@@ -77,15 +84,18 @@ const BuyerProfile = () => {
         </thead>
         <tbody>
           <tr>
-            <td>{data.data[0]}</td>
-            <td>{data1[0]}</td>
-            <td>{Number(data1[5])}</td>
-            <td>{data1[4]}</td>
-            <td>{data1[1]}</td>
-            <td>{data1[2]}</td>
-            <td>{data1[6]}</td>
-            <td><Link href={data1[3]} target="_black" className="text-sky-600">Click Here</Link></td>
-            <td>{(verifyBuyer.data).toString()}</td>
+            {
+              mounted && (<>
+              <td>{data.data?.[0]}</td>
+            <td>{data1?.[0]}</td>
+            <td>{Number(data1?.[5])}</td>
+            <td>{data1?.[4]}</td>
+            <td>{data1?.[1]}</td>
+            <td>{data1?.[2]}</td>
+            <td>{data1?.[6]}</td>
+            <td><Link href={data1?.[3]  || ""  } target="_black" className="text-sky-600">Click Here</Link></td>
+            <td>{(verifyBuyer?.data)?.toString()}</td></>)
+            }
             <td><button onClick={() => verify()} className="bg-blue-600 text-white px-5 py-2 rounded-lg">verify</button></td>
             <td><button onClick={() => reject()} className="bg-red-500 text-white px-5 py-2 rounded-lg">Reject</button></td>
           </tr>

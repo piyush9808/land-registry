@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React  from 'react'
 import {abi} from '../constants/ABIcontract'
 import {
 usePrepareContractWrite,
@@ -25,13 +25,7 @@ const Register = () => {
         functionName: 'registerSeller',
         account: address,
         args: ['arun', 1, '21', '1','1','1'],
-    });
-
-    console.log('abi', abi);
-
-    console.log('config', contractWriteConfig) ; 
-
-     
+    });     
     const {
         data: mintData,
         write: mint,

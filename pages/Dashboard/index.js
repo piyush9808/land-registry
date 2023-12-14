@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import DashboardComponents from '../../components/DashboardComponent'
-import Layout from '../../components/layout';
+// import Layout from '../../components/layout';
+import Layout from '../../components/layout/index'
 const Page = ({children}) => {
 
 
@@ -13,6 +14,7 @@ const Page = ({children}) => {
 
   return (
   <Layout>
+
    <DashboardComponents />
   </Layout>
   ) 

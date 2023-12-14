@@ -24,13 +24,6 @@ const Sidebar = ({show, setter}) => {
         <RxDashboard />
         Dashboard
       </button>
-      <button 
-        onClick={() => router.push("/AddLand")}
-      className="flex  items-center  gap-3">
-        <TbHomePlus />
-        Add Land
-      </button>
-
       <button className="flex items-center gap-3"
         onClick={() => {
           router.push("/BuyerProfile");
