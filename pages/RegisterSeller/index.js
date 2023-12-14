@@ -187,7 +187,7 @@ const RegisterSeller = () => {
          onClick={(e) => handleSubmit(e)}>
           Register
          </button>
-         { uploading ? <>wait document is uploading </> :  <p>document is uploaded!</p>}
+         { file ? (uploading ? <>wait document is uploading </> :  <p>document is uploaded!</p>) : (null)}
         </form>
       </div>
     </div>

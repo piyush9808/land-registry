@@ -85,7 +85,7 @@ const DashboardComponents = () => {
                 ) : (
                   <>
                     <div className="flex flex-col items-center pb-3 z-50 gap-4 relative">
-                      <div className="absolute border -top-4  z-50  text-xl">
+                      <div className="absolute border   z-50  text-xl">
                         <FaUsers size={50} className="z-50" />
                       </div>
                       <div className="mt-14">
@@ -105,8 +105,8 @@ const DashboardComponents = () => {
                   </>
                 )}
               </div>
-              <div>
-                <div>
+              <div className="flex flex-col justify-between">
+                <div className="flex flex-col items-center">
                   <AiOutlineBank size={50} />
                   <h1>Register Lands Count</h1>
                   <p>{landCount.data?.toString()}</p>
@@ -120,8 +120,8 @@ const DashboardComponents = () => {
               </div>
               {role === "Buyer" ? (
                 <>
-                  <div>
-                    <div>
+                  <div className="flex flex-col justify-between">
+                    <div className="flex flex-col items-center">
                       <FaRegBell size={50} />
                       <h1>Total Request</h1>
                       <p>{requestCount.data?.toString()}</p>
@@ -136,8 +136,8 @@ const DashboardComponents = () => {
                 </>
               ) : (
                 <>
-                  <div>
-                    <div>
+                  <div className="flex flex-col justify-between">
+                    <div className="flex flex-col items-center">
                       <FaRegBell size={50} />
                       <h1>Total Request</h1>
                       <p>{requestCount.data?.toString()}</p>

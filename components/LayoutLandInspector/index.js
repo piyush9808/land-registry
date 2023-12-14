@@ -5,7 +5,7 @@ import SidebarLandInspector from '../SidebarLandInspector'
 const Layout = ({children}) => {
   return (
     <div>
-          <div className="px-10  h-screen">
+          <div className="px-10 bg-[#f2f2f2f7] h-screen">
        <div className="py-2">
        <Header/>
        </div>
