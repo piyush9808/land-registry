@@ -15,7 +15,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ['ipfs.io','gateway.pinata.cloud'],
+    domains: ['ipfs.io','gateway.pinata.cloud', 'copper-rear-chickadee-886.mypinata.cloud'],
   }
   // target: 'experimental-serverless-trace',
 }

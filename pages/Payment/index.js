@@ -14,6 +14,8 @@ const Payment = () => {
     args: [1],
   });
 
+
+  console.log('adsf',LandOwner.data);
   const IsLandVerified = useContractRead({
     address: ContractAddress,
     abi: abi,
@@ -42,7 +44,7 @@ const Payment = () => {
       address: ContractAddress,
       abi: abi,
       functionName: "payment",
-      args: [sellerId?.data[0], 1],
+      args: [LandOwner?.data, 1],
       value: parseEther(value.toString()),
     });
 
@@ -58,10 +60,13 @@ const Payment = () => {
       </div>
       <table className="w-full">
         <thead className="text-left">
+          <tr>
+
           <th>#</th>
           <th>Land Owner</th>
           <th>Price</th>
           <th>Make Payment</th>
+          </tr>
         </thead>
         <tbody>
           <td>1</td>
@@ -69,7 +74,7 @@ const Payment = () => {
           <td>{Price.data?.toString()}</td>
           <td>
             <button
-              disabled={!IsLandVerified.data}
+              disabled={!IsLandVerified.data || isPaid.data}
               onClick={() => payment()}
               className="disabled:bg-gray-400 bg-blue-600 min-w-[120px]  p-3 rounded-lg text-white"
             >

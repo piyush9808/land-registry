@@ -4,9 +4,11 @@ import { ContractAddress } from '../constants/ContractAddress'
 import { abi } from '../constants/ABIcontract'
 
 const BuyerRegisterBlockchain = async (SellerData) => {
+console.log("🚀 ~ BuyerRegisterBlockchain ~ SellerData:", SellerData)
 
 
 
+   try {
     const { request } = await prepareWriteContract({
         address: ContractAddress,
         abi: abi,
@@ -17,6 +19,9 @@ const BuyerRegisterBlockchain = async (SellerData) => {
       const { hash } = await writeContract(request)
 
       return hash;
+   } catch (error) {
+        console.log(error);
+   }
 }
 
 export default BuyerRegisterBlockchain

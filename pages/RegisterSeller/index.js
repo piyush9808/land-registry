@@ -1,39 +1,62 @@
-import { useState,  useEffect } from "react";
-import { useRouter } from "next/router";
-import  { abi } from '../../constants/ABIcontract'
-import {ContractAddress}  from '../../constants/ContractAddress'
-import {  useContractRead } from "wagmi";
-import { useContractWrite , useAccount} from 'wagmi'
-import RegisterToBlockchain from "../../components/SellerRegisterBlockchain";
 import Header from "../../components/Header";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "/components/components/ui/form.jsx";
+import { Input } from "/components/components/ui/input.jsx";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form } from "../../components/components/ui/form";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { Button } from "../../components/components/ui/button";
+import { useEffect, useState } from "react";
+import { prepareWriteContract, writeContract, waitForTransaction , readContract} from "@wagmi/core";
+import { ContractAddress } from "../../constants/ContractAddress";
+import { abi } from "../../constants/ABIcontract";
+import toast from "react-hot-toast";
+import { useRouter , } from "next/navigation";
+import { useAccount, useContractRead } from "wagmi";
+
+const formSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  age: z.number().positive({
+    message: "Age must be a positive number.",
+  }),
+  aadharCardNo: z.string().min(12, {
+    message: "Aadhar Card No. must be at least 12 characters.",
+  }),
+  panCardNo: z.string().min(10, {
+    message: "Pan Card No. must be at least 10 characters.",
+  }),
+  ownedLands: z.string(),
+  aadharCardImage: z.string()
+});
+
 const RegisterSeller = () => {
-  const [file, setFile] = useState("");
-  const [cid, setCid] = useState("");
   const [uploading, setUploading] = useState(false);
-
   const router = useRouter();
+  const {address} = useAccount();
 
-  const [mounted, setMounted] = useState(false);
-
-  
-  const {address, isConnected}  = useAccount();
-
-  const [SellerData, setSellerData] = useState({
-    name: "",
-    age: "",
-    AadharCardNo: "",
-    PanNo: "",
-    OwanedLands: "",
-    AadharCardImage: '' ||  cid,
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      age: "", // Provide appropriate default values for other fields
+      aadharCardNo: "",
+      panCardNo: "",
+      ownedLands: "1",
+      aadharCardImage: "",
+    },
   });
-
-
-
-
-
 
   const uploadFile = async (fileToUpload) => {
     try {
+      console.log(fileToUpload.name);
       setUploading(true);
       const formData = new FormData();
       formData.append("file", fileToUpload, { filename: fileToUpload.name });
@@ -42,10 +65,9 @@ const RegisterSeller = () => {
         body: formData,
       });
       const ipfsHash = await res.text();
+      form.setValue("aadharCardImage", ipfsHash);
       console.log(ipfsHash);
-      setCid(ipfsHash);
       setUploading(false);
-      setSellerData({ ...SellerData, AadharCardImage: ipfsHash });
     } catch (e) {
       console.log(e);
       setUploading(false);
@@ -53,149 +75,233 @@ const RegisterSeller = () => {
     }
   };
 
-  const handleChangeFile = (e) => {
-    setFile(e.target.files[0]);
+  const handleFileUpload = (e) => {
     uploadFile(e.target.files[0]);
+    console.log(e.target.files[0]);
   };
 
-
-  const handleChange = (e) => {
-    setSellerData({ ...SellerData, [e.target.name]: e.target.value });
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if(SellerData.name && SellerData.age && SellerData.AadharCardNo && SellerData.PanNo && SellerData.OwanedLands && cid){
-    try{
-
-      const isempty = Object.values(SellerData).some((item) => item === "");
-      if (!isempty) {
-        RegisterToBlockchain(SellerData);
-      }
-
-        
-       
-   
-    }
-    catch(e){
-        console.log(e)
-    }
-        console.log('handleSubmit3')
-    }
-  };
+  // console.log(form.getValues().age);
 
 
-  const getSellerCount  = useContractRead({   
+  const { data, isError, isLoading } = useContractRead({
     address: ContractAddress,
-    functionName: 'getSellersCount',
     abi: abi,
-    watch: true,
+    functionName: 'getSeller',
   })
 
-
   useEffect(() => {
-    setMounted(true);
-    if(getSellerCount.data > 0){
+   if(data){
+    if(data[0] == address ){
+      router.push('/Dashboard');
+      
+    }
+   }
+
+  },[data])
+
+
+  const onSubmit = async ({
+    username,
+    age,
+    aadharCardNo,
+    panCardNo,
+    ownedLands,
+    aadharCardImage,
+  }) => {
+
+
+    console.log("username",typeof username)
+    console.log('age', typeof age);
+    console.log('acn',typeof aadharCardNo)
+    console.log('pcn',typeof panCardNo)
+    console.log('land',typeof ownedLands)
+    console.log('image',typeof aadharCardImage)
+
+   try {
+    const { request } = await prepareWriteContract({
+      address: ContractAddress,
+      abi: abi,
+      functionName: "registerSeller",
+      args: [
+        username,
+        age,
+        aadharCardNo,
+        panCardNo,
+        ownedLands,
+        aadharCardImage,
+      ],
+    });
+
+
+
+    const { hash } = await writeContract(request);
+
+    const txWait = waitForTransaction({
+      hash: hash,
+    });
+
+    const result = await toast.promise(txWait, {
+      loading: "Waiting for transaction to complete",
+      success: "Transaction completed successfully",
+      error: "Transaction failed",
+    });
+
+    if(result.status == 'success'){
       router.push('/Dashboard');
     }
-  },[getSellerCount.data, router])
+ 
+   } catch (error) {
+      console.log(error);
+   }
+  };
 
   return (
-    <>
-    <Header />
-     <div className="flex flex-col items-center justify-center min-h-screen p-24">
-      <div className="border p-2 rounded-lg bg-gray-50 text-start w-5/12 sm:w-96 px-10">
-        <h1 className="text-2xl font-semibold font-serif">
-          {" "}
-          Seller Registration
-        </h1>
-        <form action="" onSubmit={handleSubmit}>
-          <div className="flex flex-col my-2">
-            <label htmlFor="name">Enter Name</label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              value={SellerData.name}
-              onChange={handleChange}
-              required
-              className=" my-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
+    <div className="min-h-screen flex flex-col h-screen ">
+      <Header />
 
-          <div>
-            <label htmlFor="age">Enter Age</label>
-            <input
-              type="number"
-              name="age"
-              value={SellerData.age}
-              onChange={handleChange}
-              id="age"
-              required
-              className=" my-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
+      <section className="bg-white flex flex-grow h-full   dark:bg-gray-900 ">
+        <div className=" flex-grow h-full">
+          <div className="flex justify-center   flex-grow h-full    ">
+            <div className="hidden bg-cover lg:block lg:w-2/5 bg-[url(/register-image.png)] "></div>
 
-          <div>
-            <label htmlFor="AadharCardNo">Enter AdharCard No.</label>
-            <input
-              type="text"
-              value={SellerData.AadharCardNo}
-              onChange={handleChange}
-              required
-              name="AadharCardNo"
-              className=" my-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div>
-            <label htmlFor="PanNo">Enter Pan No</label>
-            <input
-              type="text"
-              name="PanNo"
-              value={SellerData.PanNo}
-              onChange={handleChange}
-              required
-              className=" my-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div>
-            <label htmlFor="OwanedLands">Enter Owned Lands</label>
-            <input
-              type="number"
-              name="OwanedLands"
-              value={SellerData.OwanedLands}
-              onChange={handleChange}
-              required
-              className=" my-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
+            <div className="flex items-center w-full max-w-3xl pt-0 p-8 mx-auto lg:px-12 lg:w-3/5">
+              <div className="w-full">
+                <h1 className="text-2xl font-semibold tracking-wider text-gray-800 capitalize dark:text-white">
+                  Get your free account now.
+                </h1>
 
-          <div className="my-2">
-            <label htmlFor="AadharCardImage" className="my-1">
-              Add your Aadhar card (Pdf format)
-            </label>
-            <input
-              type="file"
-              onChange={handleChangeFile}
-              accept="application/pdf"
-              name="AadharCardImage"
-              required
-            />
+                <p className="mt-4 text-gray-500 dark:text-gray-400">
+                  Let’s get you all set up so you can verify your personal
+                  account and begin setting up your profile.
+                </p>
+
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className=" grid grid-cols-1 gap-6 mt-8 md:grid-cols-2"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input placeholder="shadcn" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="age"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Age</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="18"
+                              {...field}
+                              onChange={(e) => {
+                                const value = e.target.value
+                                  ? parseInt(e.target.value)
+                                  : undefined;
+                                if (!isNaN(value) || value === undefined) {
+                                  field.onChange(value);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="aadharCardNo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Aadhar Card No.</FormLabel>
+                          <FormControl>
+                            <Input placeholder="XXXX XXXX XXXX" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="panCardNo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pan Card No.</FormLabel>
+                          <FormControl>
+                            <Input placeholder="XXXXX0000X " {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="ownedLands"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>owned Land</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="">
+                      <FormField
+                        control={form.control}
+                        name="aadharCardImage"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>AadharCardImage</FormLabel>
+                            <FormControl>
+                              <input
+                                type="file"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                onChange={handleFileUpload}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {uploading && (
+                        <span className="pl-2 text-yellow-500">
+                          {" "}
+                          Please wait file is uploading...{" "}
+                        </span>
+                      )}
+                    </div>
+
+                    <Button
+                      disabled={uploading}
+                      type="submit"
+                      className="col-span-full"
+                    >
+                      Submit
+                    </Button>
+                  </form>
+                </Form>
+              </div>
+            </div>
           </div>
-         <button
-         className="button border my-2 rounded-lg w-full disabled:bg-gray-400 p-3 bg-blue-400 text-white"
-         onClick={(e) => handleSubmit(e)}>
-          Register
-         </button>
-         { file ? (uploading ? <>wait document is uploading </> :  <p>document is uploaded!</p>) : (null)}
-        </form>
-      </div>
+        </div>
+      </section>
     </div>
-    </>
-    
-    // </Layout>
   );
 };
-
 
 export default RegisterSeller;

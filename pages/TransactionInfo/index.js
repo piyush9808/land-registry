@@ -91,6 +91,8 @@ const TransactionInfo = () => {
         <div>
             <table className='w-full'>
                 <thead className='text-left'>
+                    <tr>
+
                     <th>
                         #
                     </th>
@@ -102,6 +104,7 @@ const TransactionInfo = () => {
                     <th>Property PID </th>
                     <th>Survey No.</th>
                     <th>Verify Land Tranfer</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <td>1</td>

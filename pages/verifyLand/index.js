@@ -5,6 +5,8 @@ import { ContractAddress } from '../../constants/ContractAddress'
 import { abi } from '../../constants/ABIcontract'
 import Link from 'next/link'
 import { prepareWriteContract, writeContract } from '@wagmi/core'
+import toast from 'react-hot-toast'
+import { shortenAddress } from '../../utils'
 
 const VerifyLand = () => {
 
@@ -78,6 +80,7 @@ const VerifyLand = () => {
 
 
     const verify = async () => {
+       try {
         const {request} = await prepareWriteContract({
             address: ContractAddress,
             abi: abi,
@@ -87,6 +90,10 @@ const VerifyLand = () => {
 
         await writeContract(request);
 
+       } catch (error) {
+            toast.error(error.shortMessage);
+            console.log(error);
+       }    
 
     }
 
@@ -99,6 +106,13 @@ const VerifyLand = () => {
     })
 
     console.log('alreadyVerified',alreadyVerified.data)
+
+
+    if(alreadyVerified.error){
+        console.log(error);
+        toast.error(error.message);
+        return;
+    }
 
     if(alreadyVerified.data){
         return (
@@ -136,7 +150,7 @@ const VerifyLand = () => {
                     <td>{(Price?.data)?.toString()}</td>
                     <td>{(PID?.data)?.toString()}</td>
                     <td>{(SurveyNumber?.data)?.toString()}</td>
-                    <td >{(OwnerID?.data)?.toString()}</td>
+                    <td >{shortenAddress((OwnerID?.data)?.toString())}</td>
                     <td><Link className='text-sky-400' target='_blank' href={`https://ipfs.io/ipfs/${LandImage.data}`}>Click hare</Link></td>
                     <td><Link className='text-sky-400' target='_blank' href={`https://ipfs.io/ipfs/${Document.data}`}>Click hare</Link></td>
                     <button onClick={() => verify()} className='bg-blue-600 p-4 py-3 rounded-xl text-white'>Verify It</button>

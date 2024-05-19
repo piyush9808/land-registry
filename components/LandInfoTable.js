@@ -1,17 +1,59 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useContractRead } from "wagmi";
 import { ContractAddress } from "../constants/ContractAddress";
 import { abi } from "../constants/ABIcontract";
-import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import { RoleContext } from "../context/RoleContext";
-import { prepareWriteContract, writeContract } from "@wagmi/core";
+import { prepareWriteContract, writeContract, readContract } from "@wagmi/core";
+import { getAddress } from "viem";
 
 const LandInfoTable = () => {
   const { role } = useContext(RoleContext);
 
+  const [landsData, setLandsData] = useState([]);
+
   const router = useRouter();
-  const { address } = useAccount();
+
+  const data = useContractRead({
+    address: ContractAddress,
+    abi: abi,
+    functionName: "getLandsCount",
+  });
+  console.log(Number(data.data));
+
+  useEffect(() => {
+    if (data.data) {
+      const arrayLength = Number(data.data);
+      const dynamicArray = Array.from({ length: arrayLength }, (v, i) => i + 1);
+
+      const fetchLandInfo = async () => {
+        const landPromises = dynamicArray.map((index) =>
+          readContract({
+            address: ContractAddress,
+            abi: abi,
+            functionName: "lands",
+            args: [index],
+          })
+        );
+
+        const landsData = await Promise.all(landPromises);
+        setLandsData(landsData);
+      };
+
+      fetchLandInfo();
+    }
+  }, [data.data]);
+
+  console.log(landsData);
+
+  const lands = useContractRead({
+    address: ContractAddress,
+    abi: abi,
+    functionName: "lands",
+    args: [1],
+  });
+
+  console.log(lands.data);
 
   const state = useContractRead({
     address: ContractAddress,
@@ -61,15 +103,23 @@ const LandInfoTable = () => {
     abi: abi,
   });
 
-  const requestLand = async () => {
+  console.log(sellerId.data[0]);
+
+  const requestLand = async (index) => {
+    console.log("🚀 ~ requestLand ~ index:", index)
+    try {
+    
     const { request } = await prepareWriteContract({
       address: ContractAddress,
       abi: abi,
       functionName: "requestLand",
-      args: [sellerId.data[0], 1],
+      args: ['0x754aCB4D766809c791d5A71bDCb589F5951dC873', 1],
     });
 
-    const { hash } = await writeContract(request);
+    const { hash } = await writeContract(request);  
+  } catch (error) {
+    console.log(error);
+  }
   };
 
   if (!state.data) {
@@ -100,27 +150,31 @@ const LandInfoTable = () => {
             )}
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>{Area.data.toString()}</td>
-              <td>{City.data}</td>
-              <td>{state.data}</td>
-              <td>{Price.data.toString()}</td>
-              <td>{PID.data.toString()}</td>
-              <td>{SurveyNumber.data.toString()}</td>
-              {role === "Buyer" && (
-                <>
-                  <td>
-                    <button
-                      onClick={() => requestLand()}
-                      className="bg-blue-600 w-32 px-3 py-3 text-white rounded-xl"
-                    >
-                      Request Land
-                    </button>
-                  </td>
-                </>
-              )}
-            </tr>
+            {landsData.map((land, index) => (
+              <tr key={index}>
+                <td>{land[0].toString()}</td>
+                <td>{land[1].toString()}</td>
+                <td>{land[2]}</td>
+                <td>{land[3]}</td>
+                <td>{land[4].toString()}</td>
+                <td>{land[5].toString()}</td>
+                <td>{land[6].toString()}</td>
+                {role === "Buyer" && (
+                  <>
+                    <td>
+                      <button
+                        onClick={() => requestLand(land[0])}
+                        className="bg-blue-600 w-32 px-3 py-3 text-white rounded-xl"
+                      >
+                        Request Land
+                      </button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            ))}
+
+            {/* </tr> */}
           </tbody>
         </table>
       </div>

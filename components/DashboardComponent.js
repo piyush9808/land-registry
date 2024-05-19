@@ -43,6 +43,8 @@ const DashboardComponents = () => {
     abi: abi,
   });
 
+  console.log(data);
+
   useEffect(() => {
     if (!data.data && !data1.data && !landCount.data && !requestCount.data) {
       return (
@@ -144,7 +146,7 @@ const DashboardComponents = () => {
                     </div>
                     <div>
                       <h1> Request</h1>
-                      <button className="border p-2 rounded-lg bg-blue-500 text-white ">
+                      <button  onClick={() => router.push("/RequestLand")} className="border p-2 rounded-lg bg-blue-500 text-white ">
                         View at Requested Land
                       </button>
                     </div>
