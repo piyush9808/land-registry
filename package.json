@@ -1,5 +1,6 @@
 {
-  "name": "pages-land-registry",
+  "name": "Real-Estate Marketplace",
+  "author": "Piyush Kumar",
   "version": "0.1.0",
   "private": true,
   "scripts": {
