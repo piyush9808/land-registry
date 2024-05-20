@@ -8,12 +8,12 @@ import { prepareWriteContract, writeContract } from '@wagmi/core'
 
 const RegisterToBlockchain = async ( SellerData ) => {
 
-
+console.log('SellerData', SellerData);
 const { request } = await prepareWriteContract({
   address: ContractAddress,
   abi: abi,
   functionName: 'registerSeller',
-  args: [SellerData.name, SellerData.age, SellerData.AdharCardNo, SellerData.PanNo, SellerData.OwanedLands, SellerData.AdharCardImage],
+  args: [SellerData.name, SellerData.age, SellerData.AadharCardNo, SellerData.PanNo, SellerData.OwanedLands, SellerData.AadharCardImage],
 })
 const { hash } = await writeContract(request)
 

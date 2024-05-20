@@ -6,6 +6,9 @@ import { abi } from '../../constants/ABIcontract'
 
 const AddLand = () => {
 
+  const [landImageLoading,  setLandImageLoading] = useState(false);
+  const [adharCardImageLoading, setAdharCardImageLoading] = useState(false);
+
 
   const [landData, setLandData] = useState({
     area: "",
@@ -20,13 +23,19 @@ const AddLand = () => {
 
 
   const handleChange = (e) => {
-    setLandData({ ...landData, [e.target.name]: e.target.value });
+    setLandData({ ...landData, [e.target.name]: (e.target.value) });
   }
 
 
   const uploadFile = async (fileToUpload, name) => {
+    console.log("🚀 ~ uploadFile ~ name:", name)
     console.log('fileToUpload', fileToUpload);
     try {
+      if (name === 'landImage') {
+        setLandImageLoading(true);
+      } else if (name === 'adharCardImage') {
+        setAdharCardImageLoading(true);
+      }
       const formData = new FormData();
       formData.append("file", fileToUpload, { filename: fileToUpload.name });
       const res = await fetch("/api/file", {
@@ -34,8 +43,16 @@ const AddLand = () => {
         body: formData,
       });
       const ipfsHash = await res.text();
+
       console.log(ipfsHash);
       setLandData({ ...landData, [name]: ipfsHash });
+      if(ipfsHash){
+        if (name === 'landImage') {
+          setLandImageLoading(false); 
+        } else if (name === 'adharCardImage') {
+          setAdharCardImageLoading(false);
+        }
+      } 
     } catch (e) {
       console.log(e);
       alert("Trouble uploading file");
@@ -52,14 +69,17 @@ const AddLand = () => {
 
 
   const handleChangeFile = (e) => {
+   
     uploadFile(e.target.files[0],e.target.name);
+    console.log(e.target.files[0])
   }
 
 
   const handleSubmit =async (e) => {
+   try {
     e.preventDefault();
     console.log('landData', landData);
-
+    console.log(parseInt(landData.area), landData.city, landData.state, parseInt(landData.price), parseInt(landData.propertyPID), parseInt(landData.physicalSurveyNo), landData.landImage, landData.adharCardImage)
     const isAnyFieldEmpty = Object.values(landData).some((item) => item === "");
     if (isAnyFieldEmpty) {
       alert("Please fill all the fields");
@@ -69,7 +89,7 @@ const AddLand = () => {
         address: ContractAddress,
         abi: abi,
         functionName: 'addLand',
-        args: [landData.area, landData.city, landData.state, landData.price, landData.propertyPID, landData.physicalSurveyNo, landData.landImage, landData.adharCardImage],
+        args: [Number(landData.area), landData.city, landData.state, Number(landData.price), Number(landData.propertyPID), Number(landData.physicalSurveyNo), landData.landImage, landData.adharCardImage],
       })
 
       console.log(request);
@@ -78,6 +98,10 @@ const AddLand = () => {
       console.log(hash);
       // return hash;
     }
+   } catch (error) {
+      console.log(error) 
+      alert("RPC ERROR Network down"); 
+   }
   }
 
 
@@ -147,15 +171,22 @@ const AddLand = () => {
 
         <div>
           <label htmlFor="insert Land image">insert Land image</label>
-          <input type="file" 
+          <input 
+          type="file" 
           name='landImage'
-          accept='application/png'
+          // accept='application/png'
           // value={landData.landImage}
           onChange={handleChangeFile}
+          disabled={landImageLoading}
           required
              className=" my-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
         </div>
-
+        {landImageLoading && (
+                        <span className="pl-2 text-yellow-500">
+                          {" "}
+                          Please wait file is uploading...{" "}
+                        </span>
+           )}
         <div>
           <label htmlFor="insert Adhar card document">insert Adhar card document</label>
           <input 
@@ -167,6 +198,12 @@ const AddLand = () => {
           required
             //  className=" my-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
+               {adharCardImageLoading && (
+                        <span className="pl-2 text-yellow-500">
+                          {" "}
+                          Please wait file is uploading...{" "}
+                        </span>
+                      )}
         </div>
 
         <button onClick={handleSubmit} type='submit' className='px-5 py-3 bg-blue-600 text-white rounded-lg'>Add land</button>
